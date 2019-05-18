@@ -36,9 +36,10 @@ public class MongoUtils {
      */
     public static void init() {
         if(properties == null) {
+            String configFileName = CommonUtils.getConfigFileName();
             try (InputStream in = Thread.currentThread()
                     .getContextClassLoader()
-                    .getResourceAsStream("joey-mongo.properties")){
+                    .getResourceAsStream(configFileName)){
                 //加载配置
                 properties = new Properties();
                 properties.load(in);

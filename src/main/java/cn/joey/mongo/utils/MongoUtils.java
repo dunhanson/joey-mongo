@@ -1,5 +1,6 @@
 package cn.joey.mongo.utils;
 
+import cn.joey.mongo.core.Store;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -23,71 +24,13 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
  * @description
  */
 public class MongoUtils {
-    private static MongoClient mongoClient;
-    private static MongoDatabase mongoDatabase;
     private static Properties properties;
-
-    static {
-        init();
-    }
-
-    /**
-     * 初始化
-     */
-    public static void init() {
-        if(properties == null) {
-            String configFileName = CommonUtils.getConfigFileName();
-            try (InputStream in = Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResourceAsStream(configFileName)){
-                //加载配置
-                properties = new Properties();
-                properties.load(in);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        //连接参数
-        String userName = properties.getProperty("userName");
-        String password = properties.getProperty("password");
-        String database = properties.getProperty("database");
-        String host = properties.getProperty("host");
-
-        //host转换
-        List<ServerAddress> serverAddressList = new ArrayList<>();
-        Arrays.asList(host.split(",")).forEach(obj->{
-            String[] arr = obj.split(":");
-            String ip = arr[0];
-            int port = Integer.valueOf(arr[1]);
-            serverAddressList.add(new ServerAddress(ip, port));
-        });
-
-        //CodecRegistry
-        CodecRegistry pojoCodecRegistry = fromRegistries(com.mongodb.MongoClient.getDefaultCodecRegistry(),
-                fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-
-        //MongoClientSettings
-        MongoClientSettings settings = MongoClientSettings.builder()
-                .codecRegistry(pojoCodecRegistry)
-                .applyToClusterSettings(builder -> {
-                    builder.hosts(serverAddressList);
-                }).credential(MongoCredential.createCredential(userName, database, password.toCharArray()))
-                .build();
-
-        //获取mongoClient
-        mongoClient = MongoClients.create(settings);
-        //获取mongoDatabase
-        mongoDatabase = mongoClient.getDatabase(database);
-    }
 
     /**
      * 关闭资源
      */
     public static void close() {
-        if(mongoClient != null) {
-            mongoClient.close();
-        }
+        Store.getInstance().close();
     }
 
     /**
@@ -95,8 +38,7 @@ public class MongoUtils {
      * @return
      */
     public static MongoClient getMongoClient() {
-        health();
-        return mongoClient;
+        return Store.getInstance().getMongoClient();
     }
 
     /**
@@ -104,23 +46,7 @@ public class MongoUtils {
      * @return
      */
     public static MongoDatabase getMongoDatabase() {
-        health();
-        return mongoDatabase;
-    }
-
-    /**
-     * 健康检查
-     */
-    public static void health(){
-        if(mongoDatabase == null || mongoClient == null) {
-            init();
-            return;
-        }
-        try {
-            mongoDatabase.getCollection("test").find().first();
-        } catch (Exception e) {
-            init();
-        }
+        return Store.getInstance().getMongoDatabase();
     }
 
 }

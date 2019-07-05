@@ -1,28 +1,13 @@
 import cn.joey.mongo.utils.MongoUtils;
-import com.mongodb.Block;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.*;
-import com.mongodb.client.model.Collation;
 import entity.ExtractedInformation;
 import entity.ZhaoBiaoExtraction;
 import entity.ZhongBiaoExtraction;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.Document;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.types.ObjectId;
 import org.junit.Test;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
 import static com.mongodb.client.model.Filters.eq;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 /**
  * @author dunhanson
@@ -34,9 +19,9 @@ public class StartTest {
 
     @Test
     public void test() {
-        //MongoDatabase mongoDatabase = MongoUtils.getMongoDatabase();
-        //System.out.println(mongoDatabase.getCollection("zhaobiao_extraction").find().first());
-        testExtractedInformation();
+        MongoDatabase mongoDatabase = MongoUtils.getMongoDatabase();
+        System.out.println(mongoDatabase.getCollection("zhaobiao_extraction").find().first());
+        //testExtractedInformation();
     }
 
 
@@ -83,8 +68,6 @@ public class StartTest {
     }
 
     public void start() {
-        MongoUtils.init();
-
         //database
         MongoDatabase mongoDatabase = MongoUtils.getMongoDatabase();
         MongoCollection<ZhaoBiaoExtraction> collection = mongoDatabase.getCollection("zhaobiao_extraction", ZhaoBiaoExtraction.class);
